@@ -1,0 +1,22 @@
+name:   my-xmonad
+version: "0.0.1"
+
+dependencies:
+- base >=4.8.2.0 && <4.9 || >=4.9.1.0 && <5
+- bytestring
+- containers
+- time
+- xmonad
+- xmonad-contrib
+- directory
+
+# Runnable executable for our application
+executables:
+  my-xmonad:
+    main: xmonad.hs
+    source-dirs: .
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    
