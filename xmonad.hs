@@ -143,7 +143,7 @@ myKeys conf@(XConfig { XMonad.modMask = modm }) =
            , ((0, 0x1008ff11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
            , ((modm, xK_semicolon), withFocused (sendMessage . maximizeRestore))
            , ((0, 0xff61), jumpToBack "5")
-           , ((modm, xK_m), spawn "dmenu_run")
+           , ((modm, xK_m), spawn "~/.local/bin/my-app-menu.sh")
            , ((modm .|. shiftMask, xK_m), layoutChooser)
            ]
         ++
