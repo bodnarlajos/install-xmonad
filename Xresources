@@ -1,3 +1,4 @@
+dmenu.font: Ubuntu Mono 24
 xterm*faceName: Ubuntu Mono
 xterm*faceSize: 14
 xterm*renderFont: true
