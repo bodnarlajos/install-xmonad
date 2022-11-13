@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sudo apt install -y xsecurelock feh budgie-core suckless-tools xterm
+sudo apt install -y lxqt
 
 InstallDir=.
 BuildDir=./bin

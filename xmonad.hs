@@ -11,17 +11,17 @@ import           Data.Time.Clock (getCurrentTime)
 import           Data.Monoid
 import           XMonad
 import           XMonad.Util.Run
+import           XMonad.Hooks.ManageDocks
 import           XMonad.Actions.CycleWS
+import           XMonad.Config
 import           XMonad.Actions.CycleRecentWS
 import           XMonad.Actions.Navigation2D
 import           XMonad.Actions.FloatSnap
 import           XMonad.Actions.UpdatePointer
 import           XMonad.Util.WorkspaceCompare (getSortByIndex)
 import           XMonad.Actions.GridSelect
-import           XMonad.Hooks.EwmhDesktops      ( ewmh
-						, fullscreenEventHook
-                                                )
-import qualified XMonad.Hooks.ICCCMFocus       as ICCCMFocus
+import           XMonad.Hooks.EwmhDesktops      (ewmh, fullscreenEventHook, ewmhFullscreen)
+-- import qualified XMonad.Hooks.ICCCMFocus       as ICCCMFocus
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Util.Themes
@@ -32,7 +32,7 @@ import           XMonad.Layout.Decoration
 import           XMonad.Layout.Cross
 import           XMonad.Layout.SubLayouts
 import           XMonad.Layout.Simplest
-import           XMonad.Layout.Named
+import           XMonad.Layout.Renamed
 import           XMonad.Layout.ResizableTile
 import           XMonad.Layout.ThreeColumns
 import           XMonad.Layout.LayoutBuilder
@@ -62,8 +62,8 @@ import           XMonad.Actions.SpawnOn
 import           XMonad.Hooks.ServerMode
 import qualified XMonad.Util.ExtensibleState as XS
 
-tabfont = "xft:Ubuntu Mono:bold:size=13"
-promptfont = "xft:Ubuntu Mono:bold:size=14"
+tabfont = "xft:JetBrains Mono:bold:size=12"
+promptfont = "xft:JetBrains Mono:bold:size=13"
 color1 :: String
 color1 = "#758b8b" -- active background
 color2 :: String
@@ -85,15 +85,15 @@ colorred = "#ff0000"
 up :: X()
 up = updatePointer (0.5, 0.5) (0, 0)
 myTerminal :: String
-myTerminal = "xterm"
+myTerminal = "qterminal"
 
-main = xmonad $ ewmh $ def
+main = xmonad $ ewmh $ docks $ ewmhFullscreen $ def
       { workspaces         =  [ "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        , manageHook = manageSpawn <+> myManageHook <+> manageDocks <+> manageHook defaultConfig
+        , manageHook = manageSpawn <+> myManageHook <+> manageDocks <+> manageHook def
         , layoutHook         = myLayoutHook
-        , handleEventHook    = (serverModeEventHook' commands) <+> handleEventHook def <+> docksEventHook <+> fullscreenEventHook
+        , handleEventHook    = serverModeEventHook' commands <+> handleEventHook def
         , modMask            = mod4Mask
-        , logHook            = ICCCMFocus.takeTopFocus <+> historyHook
+        -- , logHook            = ICCCMFocus.takeTopFocus <+> historyHook
         , startupHook        = startupApp
         , terminal           = myTerminal
         , keys               = myKeys
@@ -101,14 +101,14 @@ main = xmonad $ ewmh $ def
         , normalBorderColor  = "#000000"
         , focusedBorderColor = "#000000"
         , focusFollowsMouse  = False }
-myKeys conf@(XConfig { XMonad.modMask = modm }) =
+myKeys conf@XConfig { XMonad.modMask = modm } =
 
     M.fromList
         $  [
-           ((modm, xK_Left)      , XMonad.Actions.CycleWS.moveTo Prev NonEmptyWS)
-           , ((modm, xK_Right)      , XMonad.Actions.CycleWS.moveTo Next NonEmptyWS)
+           ((modm, xK_Left)      , XMonad.Actions.CycleWS.moveTo Prev (Not emptyWS))
+           , ((modm, xK_Right)      , XMonad.Actions.CycleWS.moveTo Next (Not emptyWS))
            , ((modm .|. shiftMask, xK_Left)      , moveNonEmptyAndJump Prev)
-           , ((modm .|. shiftMask, xK_Down)      , XMonad.Actions.CycleWS.moveTo Next EmptyWS)
+           , ((modm .|. shiftMask, xK_Down)      , XMonad.Actions.CycleWS.moveTo Next emptyWS)
            , ((modm .|. shiftMask, xK_Right)      , moveNonEmptyAndJump Next)
            , ((modm, xK_n)      , moveNonEmptyAndJump Next)
            , ((modm .|. shiftMask, xK_Up)      , moveEmptyAndJump)
@@ -122,29 +122,28 @@ myKeys conf@(XConfig { XMonad.modMask = modm }) =
            , ((modm .|. shiftMask, xK_space), sendMessage FirstLayout)
            , ((modm .|. shiftMask, xK_o)  , shiftAndSwapScreen)
            , ((modm .|. shiftMask, xK_Return)  , spawn myTerminal)
-           , ((controlMask .|. shiftMask .|. mod1Mask, xK_Return)  , spawn "tilix")
-           , ((controlMask .|. mod1Mask, xK_Return)  , spawn "firefox")
-           
-	   , ((modm .|. shiftMask, xK_j), windows W.swapUp)   -- Move up in stack
+           , ((modm .|. shiftMask, xK_j), windows W.swapUp)   -- Move up in stack
            , ((modm, xK_j), windows W.focusUp)-- Focus down in stack
            , ((modm, xK_Up), windows W.focusUp)-- Focus down in stack
            , ((modm, xK_Down), windows W.swapUp)-- Focus down in stack
-	         , ((modm, xK_k), windows W.focusDown)  -- Focus up in stack
-	         , ((modm .|. shiftMask, xK_k), windows W.swapDown) -- Move down in stack
-	         , ((modm, xK_h), XMonad.Actions.CycleWS.moveTo Prev NonEmptyWS) -- Move down in stack
-	         , ((modm, xK_l), XMonad.Actions.CycleWS.moveTo Next NonEmptyWS) -- Move down in stack
-	         -- M-C-hjkl
-	         , ((modm .|. controlMask, xK_Left), sendMessage Shrink)       -- Resize Master split
-	         , ((modm .|. controlMask, xK_Up), sendMessage MirrorShrink) -- Resive vertically
-	         , ((modm .|. controlMask, xK_Down), sendMessage MirrorExpand) -- Resive vertically
-	         , ((modm .|. controlMask, xK_Right), sendMessage Expand)       -- Resize Master split
-	         , ((modm .|. shiftMask, xK_u), withFocused (sendMessage . UnMerge)) -- Merge Down
-           , ((0, 0x1008ff13), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
-           , ((0, 0x1008ff11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+           , ((modm, xK_k), windows W.focusDown)  -- Focus up in stack
+           , ((modm .|. shiftMask, xK_k), windows W.swapDown) -- Move down in stack
+           , ((modm, xK_h), XMonad.Actions.CycleWS.moveTo Prev (Not emptyWS)) -- Move down in stack
+           , ((modm, xK_l), XMonad.Actions.CycleWS.moveTo Next (Not emptyWS)) -- Move down in stack
+           , ((mod1Mask, xK_Tab), nextMatch Forward isOnAnyVisibleWS) -- Move down in stack
+            , ((mod1Mask .|. shiftMask, xK_Tab), nextMatch Backward isOnAnyVisibleWS)
+           -- M-C-hjkl
+           , ((modm .|. controlMask, xK_Left), sendMessage Shrink)       -- Resize Master split
+           , ((modm .|. controlMask, xK_Up), sendMessage MirrorShrink) -- Resive vertically
+           , ((modm .|. controlMask, xK_Down), sendMessage MirrorExpand) -- Resive vertically
+           , ((modm .|. controlMask, xK_Right), sendMessage Expand)       -- Resize Master split
+           , ((modm .|. shiftMask, xK_u), withFocused (sendMessage . UnMerge)) -- Merge Down
+          --  , ((0, 0x1008ff13), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
+          --  , ((0, 0x1008ff11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
            , ((modm, xK_semicolon), withFocused (sendMessage . maximizeRestore))
-           , ((0, 0xff61), jumpToBack "5")
-           , ((modm, xK_m), spawn "~/.local/bin/my-app-menu.sh")
-           , ((modm .|. shiftMask, xK_m), layoutChooser)
+          --  , ((0, 0xff61), jumpToBack "5")
+          --  , ((modm, xK_m), spawn "~/.local/bin/my-app-menu.sh")
+          --  , ((modm .|. shiftMask, xK_m), layoutChooser)
            ]
         ++
         [((m .|. modm, k), windows $ f i)
@@ -159,12 +158,12 @@ myKeys conf@(XConfig { XMonad.modMask = modm }) =
            ]
 
 moveEmptyAndJump = do
-  nextWSId <- findWorkspace getSortByIndex Next EmptyWS 1
+  nextWSId <- findWorkspace getSortByIndex Next emptyWS 1
   windows $ W.shift nextWSId
   windows $ W.view nextWSId
 
 moveNonEmptyAndJump nextprev = do
-  nextWSId <- findWorkspace getSortByIndex nextprev NonEmptyWS 1
+  nextWSId <- findWorkspace getSortByIndex nextprev (Not emptyWS) 1
   windows $ W.shift nextWSId
   windows $ W.view nextWSId
 
@@ -173,9 +172,9 @@ jumpTo wId s = W.view wId (W.shift wId s)
 
 jumpTo' :: String -> WindowSet -> WindowSet
 jumpTo' wId s = if (W.tag $ W.workspace $ W.current s) == wId then
-    		  W.focusUp s
-	        else
-                  W.view wId s
+  W.focusUp s
+  else
+    W.view wId s
 
 type TargetWindow = String
 type PreviousWindow = String
@@ -226,7 +225,7 @@ myGSConfig4 = def { gs_cellheight   = 30
                    , gs_originFractX = 0.5
                    , gs_colorizer = (\item@(itemName, _) p1 -> stringColorizer itemName p1)
                    , gs_originFractY = 0.5
-		   , gs_font = tabfont }
+                   , gs_font = tabfont }
               
 testType :: (Monad m) => Int -> m ()
 testType a = undefined
@@ -266,17 +265,11 @@ myLayout =
      boringWindows $
      ResizableTall 1 (3/100) (1/2) []
 
-myLayout2 =
-     T.addTabsBottomAlways T.shrinkText myTabConfig2 $
-     subLayout [0] (Simplest) $
-     boringWindows $
-     ResizableTall 1 (3/100) (1/2) []
-
 myTabConfig2 = def { decoHeight = 0 }
-titleConfig = def { activeBorderWidth = 0, inactiveBorderWidth = 0, urgentBorderWidth = 0, decoWidth = -1, decoHeight = 5, activeColor = "#808aa9", activeTextColor = "#000000", inactiveColor = "#292e38", inactiveTextColor = "#ffffff" }
-myTabConfig = def { fontName = tabfont, decoHeight = 28, inactiveColor = "#292e38", activeColor = "#808aa9", inactiveTextColor = "white", activeTextColor = "black", activeBorderColor = "black", inactiveBorderColor = "black", activeBorderWidth = 2, inactiveBorderWidth = 1 }
+titleConfig = def { activeBorderWidth = 0, inactiveBorderWidth = 0, urgentBorderWidth = 0, decoWidth = 0, decoHeight = 5, activeColor = "#808aa9", activeTextColor = "#000000", inactiveColor = "#292e38", inactiveTextColor = "#ffffff" }
+myTabConfig = def { fontName = tabfont, decoHeight = 0, inactiveColor = "#292e38", activeColor = "#808aa9", inactiveTextColor = "white", activeTextColor = "black", activeBorderColor = "black", inactiveBorderColor = "black", activeBorderWidth = 2, inactiveBorderWidth = 1 }
 myTabbed = T.tabbedBottomAlways T.shrinkText myTabConfig
-myLayoutHook = avoidStruts $ windowNavigation $ maximize $ (simpleDeco (MyShrink) titleConfig) $ myLayout ||| myTabbed ||| (noBorders $ Full) ||| myLayout2
+myLayoutHook = avoidStruts $ windowNavigation $ maximize $ (simpleDeco (MyShrink) titleConfig) $ myLayout ||| myTabbed 
 
 floatClassname = ["Xmessage", "File-roller", "yad", "Yad", "gmrun", "pavucontrol", "xarchiver"]
 floatTitle = ["Save File", "gmrun"]
@@ -290,7 +283,7 @@ myManageHook :: ManageHook
 myManageHook = composeAll
             . concat
             $ [ [isDialog --> doCenterFloat]
-	      ,	[isFullscreen --> doFullFloat]
+            , [isFullscreen --> doFullFloat]
               , [className =? c --> doCenterFloat | c <- floatClassname ]
               , [title =? t --> doCenterFloat | t <- floatTitle ]
               , [winCheck t' --> doF (jumpTo "9") | t' <- sendTo9Classname ]
@@ -304,8 +297,8 @@ layoutPromptStyle = def { gs_cellheight   = 30
                    , gs_cellpadding  = 6
                    , gs_originFractX = 0.5
                    , gs_originFractY = 0.5
-		   , gs_colorizer = (\_ isActive -> if isActive then return ("white", "black") else return ("black", "white"))
-		   , gs_font = tabfont }
+                   , gs_colorizer = (\_ isActive -> if isActive then return ("white", "black") else return ("black", "white"))
+                   , gs_font = tabfont }
 
 actions = [("+ Master +", sendMessage (IncMasterN 1))
        ,("- Master -", sendMessage (IncMasterN (-1)))
