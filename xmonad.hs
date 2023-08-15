@@ -85,7 +85,7 @@ colorred = "#ff0000"
 up :: X()
 up = updatePointer (0.5, 0.5) (0, 0)
 myTerminal :: String
-myTerminal = "qterminal"
+myTerminal = "alacritty"
 
 main = xmonad $ ewmh $ docks $ ewmhFullscreen $ def
       { workspaces         =  [ "1", "2", "3", "4", "5", "6", "7", "8", "9"]
@@ -138,11 +138,11 @@ myKeys conf@XConfig { XMonad.modMask = modm } =
            , ((modm .|. controlMask, xK_Down), sendMessage MirrorExpand) -- Resive vertically
            , ((modm .|. controlMask, xK_Right), sendMessage Expand)       -- Resize Master split
            , ((modm .|. shiftMask, xK_u), withFocused (sendMessage . UnMerge)) -- Merge Down
-          --  , ((0, 0x1008ff13), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
-          --  , ((0, 0x1008ff11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+           , ((0, 0x1008ff13), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
+           , ((0, 0x1008ff11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
            , ((modm, xK_semicolon), withFocused (sendMessage . maximizeRestore))
           --  , ((0, 0xff61), jumpToBack "5")
-          --  , ((modm, xK_m), spawn "~/.local/bin/my-app-menu.sh")
+           , ((modm, xK_m), spawn "~/.local/bin/my-app-menu.sh")
           --  , ((modm .|. shiftMask, xK_m), layoutChooser)
            ]
         ++
