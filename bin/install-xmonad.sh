@@ -10,6 +10,8 @@ mkdir -p $LocalBin
 cp $BuildDir/xmonad $LocalBin
 cp $BuildDir/my-xmonad $LocalBin
 cp $BuildDir/my-app-menu.sh $LocalBin
+cp $BuildDir/video_brightnessdown.sh $LocalBin
+cp $BuildDir/video_brightnessup.sh $LocalBin
 
 # copy init for xorg
 cp $BuildDir/xinitrc ~/.xinitrc

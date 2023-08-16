@@ -1,0 +1,15 @@
+/usr/bin/xsetroot -cursor_name left_ptr &
+
+ISRUNIBUSD=$(ps ax|egrep -c '^.+[0-9]{2}\sibus-daemon$')
+if [ $ISRUNIBUSD -gt 0 ];then
+	killall ibus-daemon
+fi
+ibus-daemon -r &
+
+ISRUNPANEL=$(ps ax|egrep -c '^.+[0-9]{2}\stint2$')
+if [ $ISRUNPANEL -gt 0 ];then
+	killall tint2
+fi
+/usr/bin/tint2 &
+
+$HOME/.local/bin/my-xmonad

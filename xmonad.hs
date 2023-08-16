@@ -257,7 +257,7 @@ jumpToOrSwap tag' s =
 
 startupApp :: X ()
 startupApp = do
-  spawn "/home/lbodnar/.local/bin/xmonad-startup.sh"
+  spawn "~/.local/bin/xmonad-startup.sh"
 
 myLayout =
      T.addTabsBottomAlways T.shrinkText myTabConfig $
