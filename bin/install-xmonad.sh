@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sudo apt install -y tint2 dunst dbus-x11 alacritty
+sudo apt install -y tint2 dunst dbus-x11 alacritty brightnessctl
 
 BuildDir=./bin
 LocalBin=~/.local/bin
